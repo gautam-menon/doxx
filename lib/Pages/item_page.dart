@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:dox/Helpers/constants.dart';
 import 'package:dox/Models/item_model.dart';
 import 'package:dox/Models/user_model.dart';
-
-import 'package:dox/Services/Firebase/chat_services.dart';
 import 'package:dox/Services/Firebase/firebase_services.dart';
 
 import 'package:dox/Utils/locator.dart';
@@ -18,9 +15,9 @@ import 'package:provider/provider.dart';
 
 class ItemPage extends StatefulWidget {
   final UserModel user;
-  final DocumentModel item;
+  final DocumentModel document;
   final String itemId;
-  ItemPage({Key key, this.item, @required this.user, this.itemId})
+  ItemPage({Key key, this.document, @required this.user, this.itemId})
       : super(key: key);
 
   @override
@@ -31,17 +28,17 @@ class _ItemPageState extends State<ItemPage> {
   bool isLoading = false;
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
         appBar: AppBar(
-          title: Text('Ad Details'),
+          title: Text('Document Details'),
           elevation: 0,
           actions: [
             UserPopUpMenu(
-              item: widget.item,
-              isMe: widget.item.user.uid == widget.user.uid,
+              item: widget.document,
+              isMe: widget.document.user.uid == widget.user.uid,
             )
           ],
         ),
@@ -64,12 +61,14 @@ class _ItemPageState extends State<ItemPage> {
                           children: [
                             InkWell(
                               onTap: () => locator<NavigationService>()
-                                  .navigateTo('fullscreenImage',
-                                      arguments: [widget.item.imageUrl, null]),
+                                  .navigateTo('fullscreenImage', arguments: [
+                                widget.document.imageUrl,
+                                null
+                              ]),
                               child: Hero(
-                                tag: widget.item.id,
+                                tag: widget.document.id,
                                 child: ImageSlider(
-                                    imageUrl: widget.item.imageUrl,
+                                    imageUrl: widget.document.imageUrl,
                                     screenHeight: screenHeight * 0.5,
                                     screenWidth: screenWidth),
                               ),
@@ -89,14 +88,14 @@ class _ItemPageState extends State<ItemPage> {
                                         ? false
                                         : likes
                                             .data()['itemId']
-                                            .contains(widget.item.id);
+                                            .contains(widget.document.id);
                                     return CircleAvatar(
                                       backgroundColor: Colors.white,
                                       radius: screenHeight * .06,
                                       child: LikeIcon(
                                           isLiked: isLiked,
                                           screenHeight: screenHeight * 1.2,
-                                          item: widget.item),
+                                          item: widget.document),
                                     );
                                     //    );
                                   }),
@@ -165,7 +164,8 @@ class _ItemPageState extends State<ItemPage> {
                                                   });
                                                   bool response = await locator<
                                                           FirebaseServices>()
-                                                      .enableAd(widget.item);
+                                                      .enableAd(
+                                                          widget.document);
                                                   setState(() {
                                                     result = response;
                                                     isLoading = false;
@@ -223,7 +223,7 @@ class _ItemPageState extends State<ItemPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.item.title,
+                widget.document.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -235,7 +235,7 @@ class _ItemPageState extends State<ItemPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${widget.item.category}',
+                    '${widget.document.category}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -250,71 +250,23 @@ class _ItemPageState extends State<ItemPage> {
                 child: Text(
                   DateFormat('dd MMM, yyyy').format(
                       DateTime.fromMillisecondsSinceEpoch(
-                          widget.item.dateSubmitted)),
+                          widget.document.dateSubmitted)),
                   style: TextStyle(
                     color: Colors.black54,
                     fontSize: 18,
                   ),
                 ),
               ),
-              widget.item.status == 'inactive'
-                  ? Column(
-                      children: [
-                        IconButton(
-                            icon: Icon(
-                              Icons.done,
-                              size: screenHeight * 0.05,
-                              color: primaryAppColor,
-                            ),
-                            onPressed: () => enableDialog(context)),
-                        Text('Enable')
-                      ],
-                    )
-                  : Column(children: [
-                      ElevatedButton(
-                          onPressed: () =>
-                              bookingsWidget(screenHeight, screenWidth),
-                          child: Text('View bookings'))
-                    ]),
-              StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                  stream:
-                      locator<FirebaseServices>().getBookings(widget.item.id),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CupertinoActivityIndicator();
-                    }
-                    Map<String, dynamic> data = snapshot.data.data();
-                    bool isBooked =
-                        data != null ? data[widget.user.uid] != null : false;
-                    int count = snapshot?.data?.data()?.length ?? 0;
-                    return Row(
-                      children: [
-                        Text(
-                            (count == 0
-                                ? 'Be the first one to book!'
-                                : count == 1
-                                    ? '$count booking'
-                                    : '$count bookings'),
-                            style: TextStyle(
-                                color: primaryAppColor, fontSize: 15)),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            IconButton(
-                                icon: Icon(
-                                    isBooked
-                                        ? FontAwesomeIcons.solidBookmark
-                                        : FontAwesomeIcons.bookmark,
-                                    size: screenHeight * 0.05,
-                                    color: primaryAppColor),
-                                onPressed: () => bookDialog(
-                                    isBooked, screenHeight, screenWidth)),
-                            Text(isBooked ? 'Unbook' : 'Book'),
-                          ],
-                        ),
-                      ],
-                    );
-                  }),
+              if (widget.document.status == 'inactive') ...[
+                IconButton(
+                    icon: Icon(
+                      Icons.done,
+                      size: screenHeight * 0.05,
+                      color: primaryAppColor,
+                    ),
+                    onPressed: () => enableDialog(context)),
+                Text('Enable')
+              ],
               SizedBox(
                 height: screenHeight * 0.02,
               ),
@@ -329,26 +281,28 @@ class _ItemPageState extends State<ItemPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Align(
-                        alignment: Alignment.center,
-                        child: Text(
-                          "Description:",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 23,
-                          ),
-                        )),
-                    Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '${widget.item.description}',
-                          maxLines: 6,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 20,
-                          ),
-                        )),
+                    if (widget.document.description.isNotEmpty) ...[
+                      Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Description:",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 23,
+                            ),
+                          )),
+                      Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '${widget.document.description}',
+                            maxLines: 6,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 20,
+                            ),
+                          )),
+                    ],
                     SizedBox(
                       height: screenHeight * 0.02,
                     ),
@@ -367,10 +321,10 @@ class _ItemPageState extends State<ItemPage> {
                   maxLines: 2,
                 ),
                 subtitle: Text(
-                  "${widget.item.user.name}",
+                  "${widget.document.user.name}",
                   maxLines: 2,
                 ),
-                trailing: widget.item.user.uid == widget.user.uid
+                trailing: widget.document.user.uid == widget.user.uid
                     ? Container(
                         width: 0,
                         height: 0,
@@ -381,7 +335,7 @@ class _ItemPageState extends State<ItemPage> {
                           color: primaryAppColor,
                         ),
                         onPressed: () =>
-                            showUserDetails(widget.item.user, context)),
+                            showUserDetails(widget.document.user, context)),
               ),
               Divider(
                 color: Colors.black54,
@@ -389,147 +343,6 @@ class _ItemPageState extends State<ItemPage> {
             ],
           ))
     ]);
-  }
-
-  Future bookingsWidget(double screenHeight, double screenWidth) {
-    return showModalBottomSheet(
-        isScrollControlled: true,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20.0))),
-        context: context,
-        builder: (context) => Container(
-            height: screenHeight * .7,
-            width: screenWidth,
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                    icon: Icon(
-                      Icons.cancel,
-                      color: primaryAppColor,
-                    ),
-                    onPressed: () => Navigator.of(context).pop()),
-              ),
-              Text('Bookings',
-                  style: TextStyle(color: Colors.black54, fontSize: 26)),
-              Divider(
-                color: Colors.black54,
-              ),
-              Expanded(
-                child: StreamBuilder(
-                    stream:
-                        locator<FirebaseServices>().getBookings(widget.item.id),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CupertinoActivityIndicator());
-                      }
-                      if (snapshot.data.data() == null) {
-                        return Center(child: Text('No bookings yet 0.0'));
-                      }
-                      List values = snapshot.data?.data()?.values?.toList();
-                      return ListView.builder(
-                          itemCount: values.length,
-                          itemBuilder: (context, index) {
-                            UserModel user = UserModel.fromJson(values[index]);
-                            return ListTile(
-                              leading: user.photoURL == null
-                                  ? CircleAvatar(child: Icon(Icons.person))
-                                  : SizedBox(
-                                      height: screenHeight * .05,
-                                      child: CachedNetworkImage(
-                                        imageUrl: user.photoURL,
-                                        progressIndicatorBuilder:
-                                            (context, url, progress) =>
-                                                ImageLoader(
-                                          screenWidth: screenWidth,
-                                          progress: progress,
-                                        ),
-                                        imageBuilder: (context, image) =>
-                                            CircleAvatar(
-                                          backgroundImage: image,
-                                        ),
-                                      ),
-                                    ),
-                              title: Text(user.name),
-                              trailing: IconButton(
-                                  icon: Icon(FontAwesomeIcons.envelope,
-                                      size: screenHeight * 0.05,
-                                      color: primaryAppColor),
-                                  onPressed: () async {
-                                    setState(() {
-                                      Navigator.of(context).pop();
-                                      isLoading = true;
-                                    });
-                                    bool response =
-                                        await locator<ChatServices>().setChatId(
-                                            widget.user,
-                                            widget.item.user,
-                                            widget.item);
-
-                                    if (response) {
-                                      locator<NavigationService>()
-                                          .navigateTo('chatPage', arguments: [
-                                        user.uid + widget.user.uid,
-                                        widget.item,
-                                        widget.item.user
-                                      ]);
-                                    } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(SnackBar(
-                                        content: Text(
-                                            'Error opening chat, please check your internet connection ;)'),
-                                      ));
-                                    }
-                                    setState(() {
-                                      isLoading = false;
-                                    });
-                                  }),
-                            );
-                          });
-                    }),
-              )
-            ])));
-  }
-
-  Future bookDialog(bool isBooked, double screenHeight, double screenWidth) {
-    return showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (context) => Dialog(
-              child: Container(
-                child: FutureBuilder(
-                    future: isBooked
-                        ? locator<FirebaseServices>()
-                            .unBookItem(widget.item, widget.user)
-                        : locator<FirebaseServices>()
-                            .bookItem(widget.item, widget.user.name),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return LoaderWidget(
-                            text: isBooked ? 'UnBooking item' : 'Booking item',
-                            screenWidth: screenWidth,
-                            screenHeight: screenHeight);
-                      } else if (snapshot?.data ?? false) {
-                        return SuccessDialog(
-                          title: 'Success!',
-                          subtitle: isBooked
-                              ? '${widget.item.title}\n successfully unbooked!'
-                              : '${widget.item.title}\n successfully booked!',
-                          function: () {
-                            Navigator.of(context).pop();
-                          },
-                          screenHeight: screenHeight,
-                          screenWidth: screenWidth,
-                        );
-                      } else {
-                        return ErrorDialog(
-                            screenWidth: screenWidth,
-                            screenHeight: screenHeight,
-                            error: snapshot?.data['error']);
-                      }
-                    }),
-              ),
-            ));
   }
 }
 

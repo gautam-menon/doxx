@@ -56,7 +56,7 @@ class _UserItemsState extends State<UserItems> {
       child: Scaffold(
         backgroundColor: backgroundColor,
         appBar: AppBar(
-          title: Text('Your thrifts'),
+          title: Text('Your Documents'),
           elevation: 0,
         ),
         body: FutureBuilder<QuerySnapshot>(
@@ -77,7 +77,7 @@ class _UserItemsState extends State<UserItems> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'No thrifts yet :(',
+                      'No Documents yet :(',
                       style: bigBlackText,
                     ),
                     ElevatedButton(

@@ -11,9 +11,9 @@ import 'package:dox/Utils/navigation.dart';
 import 'package:dox/Utils/reusable_widgets.dart';
 
 class ReviewPage extends StatelessWidget {
-  final DocumentModel item;
+  final DocumentModel document;
 
-  const ReviewPage({Key key, this.item}) : super(key: key);
+  const ReviewPage({Key key, this.document}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -33,10 +33,10 @@ class ReviewPage extends StatelessWidget {
                 InkWell(
                   onTap: () => locator<NavigationService>().navigateTo(
                       'fullscreenImage',
-                      arguments: [item.imageUrl, item.tempImages]),
+                      arguments: [document.imageUrl, document.tempImages]),
                   child: ImageSlider(
-                      imageUrl: item.imageUrl,
-                      imageFiles: item.tempImages,
+                      imageUrl: document.imageUrl,
+                      imageFiles: document.tempImages,
                       screenHeight: screenHeight * 0.6,
                       screenWidth: screenWidth),
                 ),
@@ -55,8 +55,8 @@ class ReviewPage extends StatelessWidget {
               heroTag: 'submitAd',
               isExtended: true,
               child: Text('Submit Ad'),
-              onPressed: () => submitOrder(
-                  item, item.tempImages, screenHeight, screenWidth, context),
+              onPressed: () => submitOrder(document, document.tempImages,
+                  screenHeight, screenWidth, context),
             )),
       ),
     );
@@ -79,7 +79,7 @@ class ReviewPage extends StatelessWidget {
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            item.title,
+            document.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -88,26 +88,28 @@ class ReviewPage extends StatelessWidget {
             ),
           ),
         ),
-        Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              "Description:",
-              style: TextStyle(
-                color: Colors.black54,
-                fontSize: 18,
-              ),
-            )),
-        Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              '${item.description}',
-              maxLines: 5,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-              ),
-            )),
+        if (document.description.isNotEmpty) ...[
+          Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Description:",
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 18,
+                ),
+              )),
+          Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '${document.description}',
+                maxLines: 5,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                ),
+              )),
+        ],
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -119,7 +121,7 @@ class ReviewPage extends StatelessWidget {
               ),
             ),
             Text(
-              '${item.category}',
+              '${document.category}',
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 18,

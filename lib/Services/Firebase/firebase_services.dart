@@ -58,34 +58,15 @@ class FirebaseServices {
     return result;
   }
 
-  Future<List<DocumentSnapshot<Map<String, dynamic>>>> searchResults(
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> searchResults(
       String keyword) async {
-    List<DocumentSnapshot<Map<String, dynamic>>> results = [];
-    DocumentSnapshot result = await FirebaseFirestore.instance
-        .collection('ItemList')
-        .doc('ItemList')
-        .get();
-
-    Map<String, dynamic> data = result.data();
-
-    await Future.forEach<MapEntry<String, dynamic>>(data.entries,
-        (element) async {
-      String uid = element.value['uid'] ?? '';
-      if (uid != user.uid) {
-        String title = element.value['title'];
-        if (title.contains(keyword)) {
-          if (results.length < 10) {
-            String docId = element.key;
-            DocumentSnapshot doc = await getItemsFromdocId(docId);
-            if (doc.exists) {
-              results.add(doc);
-            }
-          }
-        }
-      }
-    });
-
-    return results;
+    final result =
+        await FirebaseFirestore.instance.collection('AllItems').get();
+    final x = result.docs.where((element) {
+      print(element.data());
+      return element.data()['title'].contains(keyword);
+    }).toList();
+    return x;
   }
 
   Future<List<DocumentSnapshot<Map<String, dynamic>>>> getFavorites(

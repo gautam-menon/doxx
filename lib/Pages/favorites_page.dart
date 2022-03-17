@@ -67,7 +67,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     ),
                     ElevatedButton(
                       child: Text(
-                        'Checkout thrifts!',
+                        'Checkout your documents!',
                       ),
                       onPressed: () => locator<NavigationService>()
                           .replaceCurrentWith('landingPage', arguments: 0),

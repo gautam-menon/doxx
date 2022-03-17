@@ -172,8 +172,6 @@ class ItemTile extends StatelessWidget {
         child: InkWell(
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
-          onLongPress: () =>
-              item.user.uid == user.uid ? {} : onLongPressFunction(context),
           onTap: () => locator<NavigationService>()
               .navigateTo('itemPage', arguments: item),
           child: Container(
@@ -198,7 +196,6 @@ class ItemTile extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.only(left: 8, top: 2),
                         child: Column(
-                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -224,10 +221,16 @@ class ItemTile extends StatelessWidget {
                                 fontSize: 12,
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 4),
-                              child: inActiveIndicator(
-                                  user, isLiked, screenHeight),
+                            Row(
+                              children: [
+                                Spacer(),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(bottom: 4, left: 4),
+                                  child: inActiveIndicator(
+                                      user, isLiked, screenHeight),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -241,37 +244,6 @@ class ItemTile extends StatelessWidget {
         ),
       );
     });
-  }
-
-  Future onLongPressFunction(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        child: Container(
-          height: MediaQuery.of(context).size.height * 0.3,
-          width: MediaQuery.of(context).size.width,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ChatOptions(
-                title: 'View profile',
-                function: () => showUserDetails(item.user, context),
-              ),
-              ChatOptions(
-                title: 'View this category',
-                function: () => locator<NavigationService>()
-                    .navigateTo('categoryPage', arguments: item.category),
-              ),
-              ChatOptions(
-                title: 'Report',
-                function: () => locator<NavigationService>()
-                    .navigateTo('reportPage', arguments: item),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Padding inActiveIndicator(UserModel user, bool isLiked, double screenHeight) {
@@ -333,25 +305,6 @@ class ImageLoader extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class ChatOptions extends StatelessWidget {
-  final Function function;
-  final String title;
-  const ChatOptions({
-    Key key,
-    this.function,
-    this.title,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-        onTap: function,
-        child: ListTile(
-          title: Text(title),
-        ));
   }
 }
 

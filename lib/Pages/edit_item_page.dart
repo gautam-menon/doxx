@@ -24,7 +24,6 @@ class _EditPageState extends State<EditPage> {
   TextEditingController descriptionController = TextEditingController();
 
   String category;
-  String initSize;
   bool tempCanMessage;
   final formKey = GlobalKey<FormState>();
   @override
@@ -123,8 +122,7 @@ class _EditPageState extends State<EditPage> {
                       TextFormField(
                         maxLines: 5,
                         maxLength: 400,
-                        validator: (val) =>
-                            val == '' ? 'Please provide a description' : null,
+                        
                         style: TextStyle(
                           color: Colors.black,
                         ),
@@ -149,49 +147,6 @@ class _EditPageState extends State<EditPage> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Size (Optional)',
-                          style: smallblacknormaltext,
-                        ),
-                      ),
-                      SizedBox(
-                        height: screenHeight * .01,
-                      ),
-                      sizeSelector(initSize),
-                      SizedBox(
-                        height: screenHeight * .05,
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Price',
-                          style: smallblacknormaltext,
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: SizedBox(
-                          width: screenWidth * 0.8,
-                          child: TextFormField(
-                            validator: (val) {
-                              String res;
-                              if (val.length == 0) {
-                                res = 'Please enter the price';
-                              } else if (int.tryParse(val) == null) {
-                                res = 'Invalid amount';
-                              }
-                              return res;
-                            },
-                            keyboardType: TextInputType.number,
-                            controller: priceController,
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: screenHeight * .05,
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
                           'Category',
                           style: smallblacknormaltext,
                         ),
@@ -200,7 +155,6 @@ class _EditPageState extends State<EditPage> {
                       SizedBox(
                         height: screenHeight * .05,
                       ),
-
                       submitButton(screenHeight, screenWidth)
                     ],
                   ),
@@ -217,7 +171,7 @@ class _EditPageState extends State<EditPage> {
       double screenHeight, double screenWidth) {
     return Consumer<OrderProvider>(
         builder: (context, value, child) => Container(
-              width: MediaQuery.of(context).size.width * .5,
+              width: screenWidth * .5,
               child: FloatingActionButton(
                   heroTag: 'submitEdit',
                   isExtended: true,
@@ -227,15 +181,13 @@ class _EditPageState extends State<EditPage> {
                       if (titleController.text != '' ||
                           descriptionController.text != '' ||
                           price != null) {
-                        String initTitle = widget.item.title;
+                        
                         DocumentModel newItem = widget.item;
                         newItem
-                        
                           ..category = category.toUpperCase()
                           ..title = titleController.text.trim().toUpperCase()
-                          
                           ..description = descriptionController.text;
-                        bool titleChanged = initTitle != newItem.title;
+                        
                         showDialog(
                             barrierDismissible: false,
                             context: context,
@@ -244,7 +196,7 @@ class _EditPageState extends State<EditPage> {
                                     child: FutureBuilder(
                                         future: locator<OrderServices>()
                                             .uploadEditedItem(
-                                                newItem, titleChanged),
+                                                newItem),
                                         builder: (context, snapshot) {
                                           if (snapshot.connectionState ==
                                               ConnectionState.waiting) {
@@ -287,11 +239,7 @@ class _EditPageState extends State<EditPage> {
                                                                     .bold),
                                                       ),
                                                       Container(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            .5,
+                                                        width: screenWidth * .5,
                                                         child:
                                                             FloatingActionButton(
                                                                 heroTag:
@@ -335,12 +283,12 @@ class _EditPageState extends State<EditPage> {
       decoration: BoxDecoration(
         color: backgroundColor,
       ),
-      // width: screenWidth,
       height: screenHeight * .08,
       child: DropdownButton<String>(
           underline: Container(),
           isExpanded: true,
-          value: category,
+          value: category[0] +
+              category.substring(1, category.length).toLowerCase(),
           items: categories
               .map((e) => DropdownMenuItem<String>(
                     child: Text(e),
@@ -353,32 +301,6 @@ class _EditPageState extends State<EditPage> {
             });
           }),
     );
-  }
-
-  Consumer<OrderProvider> sizeSelector(String selectedSize) {
-    return Consumer<OrderProvider>(builder: (context, value, child) {
-      return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: sizeList
-              .map(
-                (size) => InkWell(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () {
-                    setState(() {
-                      initSize = null;
-                    });
-                    value.selectSize(size);
-                  },
-                  child: SizeCircle(
-                    isSelected: (selectedSize ?? value.size) == size,
-                    sizeOfCircle: 6.2,
-                    size: size,
-                  ),
-                ),
-              )
-              .toList());
-    });
   }
 
   buildImages(double screenWidth, double screenHeight,

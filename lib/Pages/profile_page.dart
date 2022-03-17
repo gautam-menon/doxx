@@ -128,9 +128,9 @@ class DrawerItems extends StatelessWidget {
                 width: double.infinity,
                 color: primaryAppColor,
                 child: Center(
-                    child: Image.asset(
-                  'images/app_logo.png',
-                  height: screenHeight * .28,
+                    child: Icon(
+                  Icons.document_scanner_outlined,
+                  size: screenHeight * .2,
                 ))),
             DrawerTile(
                 screenHeight: screenHeight,

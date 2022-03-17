@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dox/Models/item_model.dart';
-import 'package:dox/Services/http_services.dart';
-import 'package:dox/Utils/locator.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class OrderServices {
@@ -35,7 +33,6 @@ class OrderServices {
     } catch (e) {
       return {"error": '$e code: 102'};
     }
-    locator<HttpServices>().addItemToList(item.title, item.id, item.user.uid);
     return true;
   }
 
@@ -67,7 +64,6 @@ class OrderServices {
 
   Future uploadEditedItem(
     DocumentModel item,
-    bool titleChanged,
   ) async {
     Map<String, dynamic> itemJson = item.toJson();
     try {
@@ -84,9 +80,6 @@ class OrderServices {
           .set(itemJson);
     } catch (e) {
       return {"error": '$e code: 102'};
-    }
-    if (titleChanged) {
-      locator<HttpServices>().addItemToList(item.title, item.id, item.user.uid);
     }
     return true;
   }

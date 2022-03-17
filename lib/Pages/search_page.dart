@@ -37,7 +37,7 @@ class _SearchPageState extends State<SearchPage> {
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
               return Padding(
-                padding: const EdgeInsets.all(6.0),
+                padding: const EdgeInsets.all(10.0),
                 child: InkWell(
                   highlightColor: Colors.transparent,
                   splashColor: Colors.transparent,
@@ -53,37 +53,34 @@ class _SearchPageState extends State<SearchPage> {
             itemCount: categories.length,
           ),
         ),
-        searchController.text == ''
-            ? Container()
-            : focusNode.hasFocus
-                ? Container()
-                : Expanded(
-                    child: FutureBuilder<
-                            List<DocumentSnapshot<Map<String, dynamic>>>>(
-                        future: locator<FirebaseServices>()
-                            .searchResults(searchController.text.toUpperCase()),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(
-                              child: CupertinoActivityIndicator(),
-                            );
-                          }
+        if (searchController.text.isNotEmpty)
+          if (!focusNode.hasFocus)
+            Expanded(
+              child: FutureBuilder<
+                      List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
+                  future: locator<FirebaseServices>()
+                      .searchResults(searchController.text.toUpperCase()),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: CupertinoActivityIndicator(),
+                      );
+                    }
 
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ListView.builder(
-                                itemCount: snapshot.data?.length ?? 0,
-                                itemBuilder: (context, index) {
-                                  return ItemTile(
-                                    user: user,
-                                    item: DocumentModel.fromJson(
-                                        snapshot.data[index].data()),
-                                  );
-                                }),
-                          );
-                        }),
-                  ),
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ListView.builder(
+                          itemCount: snapshot.data?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            return ItemTile(
+                              user: user,
+                              item: DocumentModel.fromJson(
+                                  snapshot.data[index].data()),
+                            );
+                          }),
+                    );
+                  }),
+            ),
       ],
     ));
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../Models/user_model.dart';
 import '../Pages/bug_report_page.dart';
+import '../Pages/category_page.dart';
 import '../Pages/edit_item_page.dart';
 import '../Pages/favorites_page.dart';
 import '../Pages/fullscreen_imageview.dart';
@@ -18,7 +19,7 @@ import '../Services/auth_service.dart';
 import '../Utils/locator.dart';
 
 MaterialPageRoute generateRoute(RouteSettings settings) {
-  UserModel user = locator<AuthService>().getCurrentUser();
+ final UserModel user = locator<AuthService>().getCurrentUser();
   switch (settings.name) {
     case 'loginPage':
       return MaterialPageRoute(builder: (context) => LoginPage());
@@ -79,14 +80,18 @@ MaterialPageRoute generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
         builder: (context) => ItemPage(
           user: user,
-          item: settings.arguments,
+          document: settings.arguments,
         ),
       );
       break;
+    case 'categoryPage':
+      return MaterialPageRoute(builder: (context) => CategoryPage(
+                category: settings.arguments,
+      ));
     case 'reviewPage':
       return MaterialPageRoute(
           builder: (context) => ReviewPage(
-                item: settings.arguments,
+                document: settings.arguments,
               ));
     default:
       return MaterialPageRoute(
