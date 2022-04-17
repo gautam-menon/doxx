@@ -15,6 +15,7 @@ import 'Utils/navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp();
   setupLocator();
   locator<AuthService>().init();

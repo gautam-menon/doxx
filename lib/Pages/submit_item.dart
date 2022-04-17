@@ -50,7 +50,7 @@ class _OrderPageState extends State<OrderPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        'Add atleast 1 document file. Long press to delete.',
+                        'Add atleast 1 document image. Long press to delete.',
                         style: smallblacknormaltext,
                       ),
                       BuildImages(
@@ -168,9 +168,9 @@ class _OrderPageState extends State<OrderPage> {
                     if (formKey.currentState.validate()) {
                       if (titleController.text.isNotEmpty) {
                         if (value.images.length >= 1) {
-                         final UserModel user =
+                          final UserModel user =
                               locator<AuthService>().getCurrentUser();
-                         final DocumentModel item = DocumentModel();
+                          final DocumentModel item = DocumentModel();
                           item
                             ..category = category.toUpperCase()
                             ..title = titleController.text.trim().toUpperCase()

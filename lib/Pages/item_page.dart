@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
@@ -11,6 +14,7 @@ import 'package:dox/Services/Firebase/firebase_services.dart';
 import 'package:dox/Utils/locator.dart';
 import 'package:dox/Utils/navigation.dart';
 import 'package:dox/Utils/reusable_widgets.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class ItemPage extends StatefulWidget {
@@ -245,17 +249,59 @@ class _ItemPageState extends State<ItemPage> {
                   ),
                 ],
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  DateFormat('dd MMM, yyyy').format(
-                      DateTime.fromMillisecondsSinceEpoch(
-                          widget.document.dateSubmitted)),
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 18,
+              Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    children: [
+                      IconButton(
+                          icon: Icon(
+                            Icons.download_for_offline_outlined,
+                            size: 35,
+                          ),
+                          onPressed: () async {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            try {
+                              final httpClient = new HttpClient();
+
+                              final request = await httpClient.getUrl(
+                                  Uri.parse(widget.document.imageUrl.first));
+                              final response = await request.close();
+                              final bytes =
+                                  await consolidateHttpClientResponseBytes(
+                                      response);
+                              String dir =
+                                  (await getApplicationDocumentsDirectory())
+                                      .path;
+                              File file =
+                                  new File('$dir/${widget.document.title}');
+                              await file.writeAsBytes(bytes);
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                  content: Text(
+                                      '${widget.document.title} downloaded!')));
+                            } catch (e) {
+                              // TODO
+                            }
+                            setState(() {
+                              isLoading = false;
+                            });
+                          }),
+                      Text('Download')
+                    ],
                   ),
-                ),
+                  Text(
+                    DateFormat('dd MMM, yyyy').format(
+                        DateTime.fromMillisecondsSinceEpoch(
+                            widget.document.dateSubmitted)),
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
               ),
               if (widget.document.status == 'inactive') ...[
                 IconButton(
